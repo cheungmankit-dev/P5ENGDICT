@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.K.H. Mung Yan Primary School - P.5 Dictation 1 (Unit 1)</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Nunito & Noto Sans TC for child-friendly primary school styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #fae8ff 100%);
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a5f3fc;
+            border-radius: 4px;
+        }
+
+        /* Button hover bounce effect */
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Speaking audio animation ring */
+        .pulse-speaking {
+            animation: pulse-ring 1.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        /* Real-Time Dynamic Letter Slots Styling */
+        .letter-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
+            user-select: none;
+        }
+
+        /* Slot state: Untyped (Show underline placeholder) */
+        .slot-untyped {
+            background-color: #f8fafc;
+            border: 2px dashed #94a3b8;
+            color: #cbd5e1;
+            font-weight: 900;
+        }
+
+        /* Slot state: Typed (Active letter) */
+        .slot-typed {
+            background-color: #4f46e5;
+            border: 2px solid #3730a3;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Slot state: Correct Answer */
+        .slot-correct {
+            background-color: #10b981 !important;
+            border: 2px solid #047857 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        /* Slot state: Incorrect Answer */
+        .slot-incorrect {
+            background-color: #f43f5e !important;
+            border: 2px solid #be123c !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(244, 63, 94, 0.3) !important;
+        }
+
+        /* Punctuation Slot */
+        .slot-punct {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #b45309;
+            font-weight: 900;
+        }
+
+        /* Modal Bounce in */
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-bounce-in {
+            animation: bounceIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Canvas Overlay for Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 md:p-8 text-slate-800 relative">
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- Header Section -->
+        <header class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-white relative overflow-hidden">
+            <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-sky-100 rounded-full blur-2xl opacity-80"></div>
+            <div class="absolute -left-8 -top-8 w-36 h-36 bg-purple-100 rounded-full blur-2xl opacity-80"></div>
+
+            <div class="relative z-10 flex flex-col space-y-6">
+                
+                <!-- School & Dictation Title -->
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="space-y-2">
+                        <div class="inline-flex flex-wrap items-center gap-2 bg-indigo-100 text-indigo-900 text-xs sm:text-sm font-extrabold px-3.5 py-1.5 rounded-full">
+                            <span>🏫 聖公會蒙恩小學 S.K.H. Mung Yan Primary School</span>
+                            <span>•</span>
+                            <span>P.5 Dictation 1 (Unit 1)</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                            <span>✏️ 互動英文小達人自學默書系統</span>
+                        </h1>
+                    </div>
+
+                    <!-- Speech Speed Adjustment Dropdown -->
+                    <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl flex flex-wrap items-center gap-3 shadow-sm w-full md:w-auto">
+                        <div class="flex items-center gap-1.5 text-amber-900 font-extrabold text-sm whitespace-nowrap">
+                            <span>🎧 語速設定:</span>
+                        </div>
+                        <select id="speed-selector" onchange="updateAudioSpeed(this.value)" class="bg-white text-slate-800 font-extrabold text-sm py-2 px-3 rounded-xl border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner cursor-pointer w-full sm:w-auto">
+                            <option value="0.25">🦥 0.25x (極致慢速 - 聽清每個音節)</option>
+                            <option value="0.5">🐢 0.5x (超慢速 - 清楚朗讀尾音)</option>
+                            <option value="0.85" selected>🎧 0.85x (小學標準速 - 推薦)</option>
+                            <option value="1.0">🚀 1.0x (原速 - 標準語速)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Miss Lee Guidance Banner -->
+                <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 p-4 rounded-2xl border-2 border-indigo-100 flex items-center gap-4 shadow-inner">
+                    <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md flex-shrink-0">
+                        👩🏻‍🏫
+                    </div>
+                    <p class="text-indigo-950 font-bold text-sm sm:text-base leading-snug">
+                        <span class="font-black text-indigo-700">Miss Lee 提示：</span>
+                        同學們好！遇到不會寫的字可以切換上方的<span class="underline decoration-amber-400 font-black">「語速設定」</span>聽得更清楚，或者點擊<span class="underline decoration-pink-400 font-black">「💡 金牌提示」</span>顯示第一個字母！憑實力全對最棒！加油！
+                    </p>
+                </div>
+
+                <!-- Global Action Buttons (Answer Key Completely Removed) -->
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full justify-start pt-2 border-t border-slate-100">
+                    <button onclick="playAllPartA()" class="btn-bounce bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-4 py-2.5 rounded-2xl shadow-md text-sm flex items-center gap-2">
+                        <span>🔊 順序播放 Part A</span>
+                    </button>
+                    <button onclick="resetAndRedoAll()" class="btn-bounce bg-pink-500 hover:bg-pink-600 text-white font-extrabold px-4 py-2.5 rounded-2xl shadow-md text-sm flex items-center gap-2">
+                        <span>🔄 重新練習 / 重做</span>
+                    </button>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- PART A: VOCABULARY SECTION -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-white relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-400 text-amber-950 font-black text-2xl w-12 h-12 rounded-2xl flex items-center justify-center shadow-md">
+                        A
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">PART A: Vocabulary (讀默詞語 10題)</h2>
+                        <p class="text-slate-500 font-bold text-sm">聽語音並在下方拼寫詞語，底線格子會顯示該詞語有多少個字母。</p>
+                    </div>
+                </div>
+                
+                <div id="part-a-score-badge" class="bg-slate-100 text-slate-700 font-black px-4 py-2 rounded-2xl text-center self-start sm:self-center border border-slate-200">
+                    Part A 得分: <span class="text-indigo-600 text-lg">-- / 10</span>
+                </div>
+            </div>
+
+            <!-- Vocabulary Items List Container -->
+            <div id="part-a-items-container" class="space-y-6">
+                <!-- Dynamically generated via JS -->
+            </div>
+
+            <!-- Part A Bottom Submit Bar -->
+            <div class="mt-8 pt-6 border-t-2 border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="part-a-feedback-banner" class="hidden text-base font-extrabold text-slate-700"></div>
+                <button onclick="checkPartA()" class="btn-bounce w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-3.5 rounded-2xl shadow-lg text-lg flex items-center justify-center gap-2 ml-auto">
+                    <span>✨ 核對 Part A 答案 ✨</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- PART B: PARAGRAPH SECTION -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-white relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="bg-pink-500 text-white font-black text-2xl w-12 h-12 rounded-2xl flex items-center justify-center shadow-md">
+                        B
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">PART B: Paragraph (段落填空 - 隨機 20 個空缺)</h2>
+                        <p class="text-slate-500 font-bold text-sm">點擊「🔊 聽句子」朗讀整句，根據動態底線提示填入空缺單字。</p>
+                    </div>
+                </div>
+
+                <div id="part-b-score-badge" class="bg-slate-100 text-slate-700 font-black px-4 py-2 rounded-2xl text-center self-start sm:self-center border border-slate-200">
+                    Part B 得分: <span class="text-pink-600 text-lg">-- / 20</span>
+                </div>
+            </div>
+
+            <!-- Paragraph Sentences Box -->
+            <div id="part-b-paragraph-container" class="bg-indigo-50/50 p-6 rounded-3xl border-2 border-indigo-100 leading-relaxed text-slate-800 text-lg space-y-4">
+                <!-- Dynamically generated via JS -->
+            </div>
+
+            <!-- Part B Bottom Submit Bar -->
+            <div class="mt-8 pt-6 border-t-2 border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="part-b-feedback-banner" class="hidden text-base font-extrabold text-slate-700"></div>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto ml-auto">
+                    <button onclick="reshufflePartBOnly()" class="btn-bounce w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-md text-base flex items-center justify-center gap-2">
+                        <span>🎲 重新抽選 Part B 空白題</span>
+                    </button>
+                    <button onclick="checkPartB()" class="btn-bounce w-full sm:w-auto bg-pink-500 hover:bg-pink-600 text-white font-black px-8 py-3.5 rounded-2xl shadow-lg text-lg flex items-center justify-center gap-2">
+                        <span>🚀 核對 Part B 答案 🚀</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MASTER SCORE SUMMARY MODAL -->
+        <div id="master-score-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border-4 border-white text-center space-y-6 relative animate-bounce-in">
+                <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner border-2 border-amber-200">
+                    🏆
+                </div>
+                <div>
+                    <h3 class="text-3xl font-black text-slate-800">默書完成！</h3>
+                    <p class="text-slate-500 font-bold mt-1">太棒了！這是你本次練習的成績單：</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div class="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Part A 詞語</div>
+                        <div id="modal-part-a-score" class="text-2xl font-black text-indigo-600">0 / 10</div>
+                    </div>
+                    <div class="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Part B 段落</div>
+                        <div id="modal-part-b-score" class="text-2xl font-black text-pink-600">0 / 20</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div id="modal-stars" class="text-3xl tracking-widest">⭐⭐⭐⭐⭐</div>
+                    <p id="modal-teacher-message" class="text-slate-700 font-black text-lg mt-2">"太厲害了！你真是個英文拼寫小能手！"</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button onclick="closeModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-2xl transition">
+                        查看錯題
+                    </button>
+                    <button onclick="resetAndRedoAll(); closeModal();" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-2xl shadow-md transition flex items-center justify-center gap-1">
+                        <span>🔄 重新挑戰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data Definitions - P.5 Dictation 1 (Unit 1)
+        const partAVocabData = [
+            "the destination",
+            "a road",
+            "a subway",
+            "a tunnel",
+            "a pedestrian crossing",
+            "a taxi rank",
+            "a car park",
+            "a pavement",
+            "a train station",
+            "the traffic lights"
+        ];
+
+        const partBSentenceData = [
+            "Ben and his friends Betty, Chris and Anna took part in the City Race last Saturday.",
+            "It was more difficult than they thought!",
+            "‘The first checkpoint is a hotel in Tsim Sha Tsui,’ said Betty.",
+            "‘That’s easy! I know Tsim Sha Tsui very well.’",
+            "‘How far is it from the train station to the hotel?’ asked Ben.",
+            "Chris checked the map and said, ‘It’s about three kilometres. We can go over that footbridge and walk to the hotel.’",
+            "After some discussion, they all agreed to take the bus from the bus terminal near the train station.",
+            "The children got off the bus near Kowloon Park."
+        ];
+
+        // Global State Variables
+        let currentAudioSpeed = 0.85; // Default speech rate
+        let partBBlanksState = [];
+        let lastPartAScore = 0;
+        let lastPartBScore = 0;
+
+        // Speech Rate Selector Handler
+        function updateAudioSpeed(speedVal) {
+            currentAudioSpeed = parseFloat(speedVal);
+        }
+
+        // Web Speech API Synthesis Engine
+        function speakText(text, onEndCallback = null) {
+            if (!('speechSynthesis' in window)) {
+                alert('您的瀏覽器不支援語音播放功能，請切換至 Chrome 或 Edge 瀏覽器。');
+                return;
+            }
+
+            window.speechSynthesis.cancel(); // Stop active speech
+
+            const cleanText = text.replace(/’/g, "'").replace(/‘/g, "");
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'en-US';
+            utterance.rate = currentAudioSpeed; // Dynamically set speed
+            utterance.pitch = 1.1;
+
+            if (onEndCallback) {
+                utterance.onend = onEndCallback;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Web Audio API Synthesizer for Audio Feedback
+        function playSoundEffect(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                if (type === 'success') {
+                    const freqs = [523.25, 659.25, 783.99, 1046.50];
+                    freqs.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = f;
+                        gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.08);
+                        osc.stop(ctx.currentTime + idx * 0.08 + 0.35);
+                    });
+                } else if (type === 'tryAgain') {
+                    const freqs = [392.00, 329.63];
+                    freqs.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = f;
+                        gain.gain.setValueAtTime(0.1, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.25);
+                    });
+                } else if (type === 'fanfare') {
+                    const freqs = [523.25, 659.25, 783.99, 1046.50, 880.00, 1046.50];
+                    const times = [0, 0.1, 0.2, 0.32, 0.46, 0.60];
+                    freqs.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = f;
+                        gain.gain.setValueAtTime(0.18, ctx.currentTime + times[idx]);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + times[idx] + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + times[idx]);
+                        osc.stop(ctx.currentTime + times[idx] + 0.45);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio Context error or not permitted:', e);
+            }
+        }
+
+        // Canvas Confetti Animation Loop
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+            for (let i = 0; i < 110; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: Math.random() * 4 + 3,
+                    rotation: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 8
+                });
+            }
+
+            const startTime = Date.now();
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (Date.now() - startTime > 3500) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rotation += p.vRot;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        // Real-Time Dynamic Underline/Letter Slots Renderer
+        function renderDynamicSlotsHTML(targetText, userVal, slotSizeClass = "w-7 h-9 text-base", stateClass = "") {
+            const normalizedTarget = targetText.replace(/’/g, "'");
+            const words = normalizedTarget.split(' ');
+            let globalCharIndex = 0;
+
+            let html = `<div class="flex flex-wrap items-center gap-x-3 gap-y-2">`;
+
+            words.forEach((word, wIdx) => {
+                html += `<div class="flex items-center gap-1">`;
+                
+                for (let i = 0; i < word.length; i++) {
+                    const targetChar = word[i];
+                    const typedChar = userVal && globalCharIndex < userVal.length ? userVal[globalCharIndex] : null;
+
+                    if (targetChar === "'" || targetChar === "-") {
+                        html += `
+                            <span class="letter-slot slot-punct ${slotSizeClass}">
+                                ${targetChar}
+                            </span>
+                        `;
+                    } else {
+                        let currentSlotClass = "slot-untyped";
+                        let displayChar = "_"; 
+
+                        if (stateClass) {
+                            currentSlotClass = stateClass;
+                            displayChar = typedChar ? typedChar.toUpperCase() : targetChar.toUpperCase();
+                        } else if (typedChar !== null) {
+                            currentSlotClass = "slot-typed";
+                            displayChar = typedChar.toUpperCase();
+                        }
+
+                        html += `
+                            <span class="letter-slot ${currentSlotClass} ${slotSizeClass}">
+                                ${displayChar}
+                            </span>
+                        `;
+                    }
+                    globalCharIndex++;
+                }
+
+                html += `</div>`;
+
+                if (wIdx < words.length - 1) {
+                    globalCharIndex++;
+                }
+            });
+
+            html += `</div>`;
+            return html;
+        }
+
+        // Part A UI Generator
+        function initPartAUI() {
+            const container = document.getElementById('part-a-items-container');
+            container.innerHTML = '';
+
+            partAVocabData.forEach((phrase, idx) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = "bg-slate-50 hover:bg-slate-100/80 transition p-4 sm:p-5 rounded-2xl border-2 border-slate-200/80 shadow-sm flex flex-col gap-3";
+                itemCard.id = `part-a-card-${idx}`;
+
+                const totalLetters = phrase.replace(/ /g, '').length;
+                const totalWords = phrase.split(' ').length;
+                const firstLetter = phrase.charAt(0).toUpperCase();
+
+                itemCard.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <span class="bg-indigo-600 text-white font-black text-sm w-8 h-8 rounded-xl flex items-center justify-center shadow-sm">
+                                ${idx + 1}
+                            </span>
+                            <button onclick="playPartAVocab(${idx})" id="part-a-audio-btn-${idx}" class="btn-bounce bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-extrabold px-3.5 py-1.5 rounded-xl text-sm flex items-center gap-1.5 shadow-sm">
+                                <span class="text-base">🔊</span>
+                                <span>播放發音</span>
+                            </button>
+                            <span class="text-xs font-extrabold text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                                提示: ${totalWords} 個單詞 (${totalLetters} 個字母)
+                            </span>
+                            <button onclick="toggleVocabHint(${idx})" class="btn-bounce bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold px-2.5 py-1 rounded-lg border border-amber-300 text-xs flex items-center gap-1 shadow-sm">
+                                <span>💡 金牌提示</span>
+                            </button>
+                        </div>
+
+                        <div id="part-a-status-${idx}" class="text-xl font-extrabold hidden"></div>
+                    </div>
+
+                    <!-- Gold Hint Box -->
+                    <div id="part-a-hint-box-${idx}" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-2 text-xs font-black text-amber-800 flex items-center gap-2">
+                        <span>✨ 首字母提示：首個字母是 <span class="text-base text-indigo-600 font-black underline">${firstLetter}</span></span>
+                    </div>
+
+                    <!-- Input Box -->
+                    <div class="w-full">
+                        <input type="text" 
+                               id="input-part-a-${idx}"
+                               maxlength="${phrase.length}"
+                               placeholder="請在此處輸入詞語 (共 ${totalLetters} 個字母)..."
+                               oninput="onPartAInput(${idx})"
+                               autocomplete="off"
+                               spellcheck="false"
+                               class="w-full bg-white border-2 border-indigo-200 focus:border-indigo-500 rounded-xl py-2.5 px-4 text-slate-800 font-extrabold text-lg focus:outline-none transition shadow-inner placeholder:text-slate-300">
+                    </div>
+
+                    <!-- Dynamic Slots -->
+                    <div class="pt-1">
+                        <div class="text-xs font-black text-indigo-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <span>🔡 字母格子提示 (未填字母會保持橫線):</span>
+                        </div>
+                        <div id="part-a-slots-${idx}" class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-inner overflow-x-auto">
+                            ${renderDynamicSlotsHTML(phrase, "")}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(itemCard);
+            });
+        }
+
+        function toggleVocabHint(idx) {
+            const hintBox = document.getElementById(`part-a-hint-box-${idx}`);
+            if (hintBox) {
+                hintBox.classList.toggle('hidden');
+            }
+        }
+
+        function onPartAInput(idx) {
+            const inputEl = document.getElementById(`input-part-a-${idx}`);
+            const slotsContainer = document.getElementById(`part-a-slots-${idx}`);
+            const targetPhrase = partAVocabData[idx];
+
+            slotsContainer.innerHTML = renderDynamicSlotsHTML(targetPhrase, inputEl.value);
+        }
+
+        function playPartAVocab(idx) {
+            const btn = document.getElementById(`part-a-audio-btn-${idx}`);
+            btn.classList.add('pulse-speaking', 'bg-indigo-300');
+            speakText(partAVocabData[idx], () => {
+                btn.classList.remove('pulse-speaking', 'bg-indigo-300');
+            });
+        }
+
+        function playAllPartA() {
+            let delay = 0;
+            partAVocabData.forEach((phrase, idx) => {
+                setTimeout(() => {
+                    playPartAVocab(idx);
+                }, delay);
+                delay += (2800 / currentAudioSpeed);
+            });
+        }
+
+        // Part B UI Generator
+        function initPartBUI() {
+            const container = document.getElementById('part-b-paragraph-container');
+            container.innerHTML = '';
+
+            let parsedSentences = [];
+            let wordCandidates = [];
+
+            partBSentenceData.forEach((sentence, sIdx) => {
+                const tokens = sentence.match(/[a-zA-Z]+(?:['’][a-zA-Z]+)?|[^a-zA-Z]+/g);
+                let sentenceTokens = [];
+
+                if (tokens) {
+                    tokens.forEach((tokenText) => {
+                        const isWord = /^[a-zA-Z]+(?:['’][a-zA-Z]+)?$/.test(tokenText);
+                        const tokenObj = {
+                            text: tokenText,
+                            isWord: isWord,
+                            isBlank: false,
+                            blankId: null
+                        };
+                        sentenceTokens.push(tokenObj);
+
+                        if (isWord) {
+                            wordCandidates.push({ sentenceIdx: sIdx, tokenIdx: sentenceTokens.length - 1, text: tokenText });
+                        }
+                    });
+                }
+                parsedSentences.push({ originalSentence: sentence, tokens: sentenceTokens });
+            });
+
+            // Randomly shuffle word candidates and pick 20 blanks
+            for (let i = wordCandidates.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [wordCandidates[i], wordCandidates[j]] = [wordCandidates[j], wordCandidates[i]];
+            }
+
+            const totalBlanks = Math.min(20, wordCandidates.length);
+            partBBlanksState = [];
+
+            for (let bIdx = 0; bIdx < totalBlanks; bIdx++) {
+                const candidate = wordCandidates[bIdx];
+                const tokenRef = parsedSentences[candidate.sentenceIdx].tokens[candidate.tokenIdx];
+                tokenRef.isBlank = true;
+                tokenRef.blankId = bIdx;
+
+                partBBlanksState.push({
+                    blankId: bIdx,
+                    targetWord: candidate.text,
+                    sentenceIdx: candidate.sentenceIdx
+                });
+            }
+
+            // Render Sentences
+            parsedSentences.forEach((sData) => {
+                const sentenceWrapper = document.createElement('div');
+                sentenceWrapper.className = "flex flex-wrap items-baseline gap-1.5 p-3.5 rounded-2xl hover:bg-white/70 transition border border-transparent hover:border-indigo-100";
+
+                const playBtn = document.createElement('button');
+                playBtn.onclick = () => speakText(sData.originalSentence);
+                playBtn.className = "btn-bounce bg-pink-100 hover:bg-pink-200 text-pink-800 rounded-xl px-2.5 py-1.5 inline-flex items-center justify-center transition mr-1 self-center shadow-sm text-sm font-extrabold";
+                playBtn.title = "聽這句英文";
+                playBtn.innerHTML = "🔊 <span>聽這句</span>";
+                sentenceWrapper.appendChild(playBtn);
+
+                sData.tokens.forEach(token => {
+                    if (token.isBlank) {
+                        const bIdx = token.blankId;
+                        const targetWord = token.text;
+                        const wordLen = targetWord.length;
+
+                        const blankContainer = document.createElement('span');
+                        blankContainer.className = "inline-flex flex-col items-center my-1 mx-1 align-middle";
+
+                        blankContainer.innerHTML = `
+                            <input type="text" 
+                                   id="input-part-b-${bIdx}" 
+                                   maxlength="${wordLen}"
+                                   oninput="onPartBInput(${bIdx})"
+                                   placeholder="${'_'.repeat(wordLen)}"
+                                   autocomplete="off"
+                                   spellcheck="false"
+                                   style="width: ${Math.max(wordLen * 1.35, 3.8)}rem;"
+                                   class="bg-white border-2 border-pink-300 focus:border-pink-500 rounded-lg py-1 px-1.5 text-center text-pink-800 font-black focus:outline-none transition shadow-inner text-base">
+                            <div id="part-b-slots-${bIdx}" class="mt-1">
+                                ${renderDynamicSlotsHTML(targetWord, "", "w-4 h-6 text-xs")}
+                            </div>
+                        `;
+
+                        sentenceWrapper.appendChild(blankContainer);
+                    } else {
+                        const textNode = document.createElement('span');
+                        textNode.className = "text-slate-800 font-bold text-lg";
+                        textNode.textContent = token.text;
+                        sentenceWrapper.appendChild(textNode);
+                    }
+                });
+
+                container.appendChild(sentenceWrapper);
+            });
+        }
+
+        function onPartBInput(bIdx) {
+            const inputEl = document.getElementById(`input-part-b-${bIdx}`);
+            const slotsContainer = document.getElementById(`part-b-slots-${bIdx}`);
+            const targetWord = partBBlanksState[bIdx].targetWord;
+
+            slotsContainer.innerHTML = renderDynamicSlotsHTML(targetWord, inputEl.value, "w-4 h-6 text-xs");
+        }
+
+        function reshufflePartBOnly() {
+            initPartBUI();
+            const badge = document.getElementById('part-b-score-badge');
+            badge.innerHTML = `Part B 得分: <span class="text-pink-600 text-lg">-- / 20</span>`;
+            document.getElementById('part-b-feedback-banner').classList.add('hidden');
+        }
+
+        function resetAndRedoAll() {
+            // 1. Reset Part A
+            partAVocabData.forEach((phrase, idx) => {
+                const inputEl = document.getElementById(`input-part-a-${idx}`);
+                if (inputEl) inputEl.value = '';
+
+                const slotsContainer = document.getElementById(`part-a-slots-${idx}`);
+                if (slotsContainer) slotsContainer.innerHTML = renderDynamicSlotsHTML(phrase, "");
+
+                const statusEl = document.getElementById(`part-a-status-${idx}`);
+                if (statusEl) {
+                    statusEl.classList.add('hidden');
+                    statusEl.innerHTML = '';
+                }
+
+                const hintBox = document.getElementById(`part-a-hint-box-${idx}`);
+                if (hintBox) hintBox.classList.add('hidden');
+
+                const cardEl = document.getElementById(`part-a-card-${idx}`);
+                if (cardEl) cardEl.className = "bg-slate-50 hover:bg-slate-100/80 transition p-4 sm:p-5 rounded-2xl border-2 border-slate-200/80 shadow-sm flex flex-col gap-3";
+            });
+
+            // 2. Reset Banners
+            document.getElementById('part-a-score-badge').innerHTML = `Part A 得分: <span class="text-indigo-600 text-lg">-- / 10</span>`;
+            document.getElementById('part-a-feedback-banner').classList.add('hidden');
+            document.getElementById('part-b-feedback-banner').classList.add('hidden');
+
+            lastPartAScore = 0;
+            lastPartBScore = 0;
+
+            // 3. Reshuffle Part B
+            initPartBUI();
+            document.getElementById('part-b-score-badge').innerHTML = `Part B 得分: <span class="text-pink-600 text-lg">-- / 20</span>`;
+
+            playSoundEffect('success');
+        }
+
+        function cleanStr(str) {
+            if (!str) return '';
+            return str.trim().toLowerCase().replace(/’/g, "'").replace(/\s+/g, ' ');
+        }
+
+        function checkPartA() {
+            let correctCount = 0;
+            const total = partAVocabData.length;
+
+            partAVocabData.forEach((targetPhrase, idx) => {
+                const inputEl = document.getElementById(`input-part-a-${idx}`);
+                const slotsContainer = document.getElementById(`part-a-slots-${idx}`);
+                const statusEl = document.getElementById(`part-a-status-${idx}`);
+                const cardEl = document.getElementById(`part-a-card-${idx}`);
+
+                const userVal = inputEl.value;
+                const isCorrect = cleanStr(userVal) === cleanStr(targetPhrase);
+
+                statusEl.classList.remove('hidden');
+
+                if (isCorrect) {
+                    correctCount++;
+                    statusEl.innerHTML = "✅";
+                    cardEl.className = "bg-emerald-50/80 p-4 sm:p-5 rounded-2xl border-2 border-emerald-300 shadow-sm flex flex-col gap-3 transition";
+                    slotsContainer.innerHTML = renderDynamicSlotsHTML(targetPhrase, userVal, "w-7 h-9 text-base", "slot-correct");
+                } else {
+                    statusEl.innerHTML = "❌";
+                    cardEl.className = "bg-rose-50/80 p-4 sm:p-5 rounded-2xl border-2 border-rose-300 shadow-sm flex flex-col gap-3 transition";
+                    slotsContainer.innerHTML = renderDynamicSlotsHTML(targetPhrase, userVal, "w-7 h-9 text-base", "slot-incorrect");
+                }
+            });
+
+            const badge = document.getElementById('part-a-score-badge');
+            badge.innerHTML = `Part A 得分: <span class="${correctCount === total ? 'text-emerald-600' : 'text-indigo-600'} text-lg">${correctCount} / ${total}</span>`;
+
+            const banner = document.getElementById('part-a-feedback-banner');
+            banner.classList.remove('hidden');
+            if (correctCount === total) {
+                banner.innerHTML = `🎉 太棒了！Part A 10 題全部答對！`;
+                banner.className = "text-base font-black text-emerald-600";
+                playSoundEffect('success');
+            } else {
+                banner.innerHTML = `💪 Part A 答對 ${correctCount}/${total} 題。請檢查紅框題目並重試！`;
+                banner.className = "text-base font-black text-amber-600";
+                playSoundEffect('tryAgain');
+            }
+
+            checkOverallAndShowModal(correctCount, null);
+        }
+
+        function checkPartB() {
+            let correctCount = 0;
+            const total = partBBlanksState.length;
+
+            partBBlanksState.forEach((blankObj) => {
+                const bIdx = blankObj.blankId;
+                const targetWord = blankObj.targetWord;
+                const inputEl = document.getElementById(`input-part-b-${bIdx}`);
+                const slotsContainer = document.getElementById(`part-b-slots-${bIdx}`);
+
+                const userVal = inputEl.value;
+                const isCorrect = cleanStr(userVal) === cleanStr(targetWord);
+
+                if (isCorrect) {
+                    correctCount++;
+                    inputEl.className = "bg-emerald-100 border-2 border-emerald-500 rounded-lg py-1 px-1.5 text-center text-emerald-900 font-black focus:outline-none transition text-base";
+                    slotsContainer.innerHTML = renderDynamicSlotsHTML(targetWord, userVal, "w-4 h-6 text-xs", "slot-correct");
+                } else {
+                    inputEl.className = "bg-rose-100 border-2 border-rose-400 rounded-lg py-1 px-1.5 text-center text-rose-900 font-black focus:outline-none transition text-base";
+                    slotsContainer.innerHTML = renderDynamicSlotsHTML(targetWord, userVal, "w-4 h-6 text-xs", "slot-incorrect");
+                }
+            });
+
+            const badge = document.getElementById('part-b-score-badge');
+            badge.innerHTML = `Part B 得分: <span class="${correctCount === total ? 'text-emerald-600' : 'text-pink-600'} text-lg">${correctCount} / ${total}</span>`;
+
+            const banner = document.getElementById('part-b-feedback-banner');
+            banner.classList.remove('hidden');
+            if (correctCount === total) {
+                banner.innerHTML = `🏆 太強了！Part B 20 個填空全對！`;
+                banner.className = "text-base font-black text-emerald-600";
+                playSoundEffect('success');
+            } else {
+                banner.innerHTML = `🌟 Part B 答對 ${correctCount}/${total} 個填空。對照紅色格子加油哦！`;
+                banner.className = "text-base font-black text-indigo-600";
+                playSoundEffect('tryAgain');
+            }
+
+            checkOverallAndShowModal(null, correctCount);
+        }
+
+        function checkOverallAndShowModal(scoreA, scoreB) {
+            if (scoreA !== null) lastPartAScore = scoreA;
+            if (scoreB !== null) lastPartBScore = scoreB;
+
+            document.getElementById('modal-part-a-score').textContent = `${lastPartAScore} / 10`;
+            document.getElementById('modal-part-b-score').textContent = `${lastPartBScore} / 20`;
+
+            const totalScore = lastPartAScore + lastPartBScore;
+            const percentage = Math.round((totalScore / 30) * 100);
+
+            const modalStars = document.getElementById('modal-stars');
+            const teacherMsg = document.getElementById('modal-teacher-message');
+
+            if (percentage >= 90) {
+                modalStars.textContent = "⭐⭐⭐⭐⭐";
+                teacherMsg.textContent = "🌟 震撼！你簡直是英文默書小魔術師！表現超優異！";
+                playSoundEffect('fanfare');
+                triggerConfetti();
+            } else if (percentage >= 75) {
+                modalStars.textContent = "⭐⭐⭐⭐";
+                teacherMsg.textContent = "👏 表現非常棒！離滿分只差一點點，繼續保持！";
+            } else if (percentage >= 50) {
+                modalStars.textContent = "⭐⭐⭐";
+                teacherMsg.textContent = "👍 很好的嘗試！仔細看看未填對的字母，再練習一遍吧！";
+            } else {
+                modalStars.textContent = "⭐⭐";
+                teacherMsg.textContent = "💪 不要灰心！切換慢語速多聽兩遍，按下重做再挑戰一次！";
+            }
+
+            document.getElementById('master-score-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('master-score-modal').classList.add('hidden');
+        }
+
+        // Initialize UI on window load
+        window.onload = function() {
+            initPartAUI();
+            initPartBUI();
+        };
+    </script>
+</body>
+</html>
